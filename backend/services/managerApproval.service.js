@@ -28,7 +28,6 @@ const loadPendingQuotation = async (managerId, quotationId) => {
 };
 
 const writeAudit = async (action, managerId, quotationId, details) => {
-	// AuditLog currently has a minimal schema; keep the write isolated for later enrichment.
 	await auditService.createAuditLog({ action, actor: managerId, entity: "Quotation", entityId: quotationId, details });
 };
 
@@ -50,13 +49,17 @@ const approveQuotation = async (managerId, quotationId) => {
 	});
 	await quotation.save();
 	await writeAudit("QUOTATION_APPROVED", managerId, quotationId);
-	return quotation;
+	return {
+		quotation,
+		message: "Quotation fully approved for billing and order conversion.",
+	};
 };
 
 const rejectQuotation = async (managerId, quotationId, reason) => {
 	if (!reason || !String(reason).trim()) throw new AppError("Rejection reason is required", 400);
 	const quotation = await loadPendingQuotation(managerId, quotationId);
 	quotation.approval.status = "REJECTED";
+	quotation.approval.rejectionReason = String(reason).trim();
 	quotation.status = "REJECTED";
 	await quotation.save();
 	await writeAudit("QUOTATION_REJECTED", managerId, quotationId, { reason: String(reason).trim() });
