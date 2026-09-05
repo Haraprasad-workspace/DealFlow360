@@ -11,6 +11,7 @@ const variantSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
 	{
+		sku: { type: String, trim: true, uppercase: true, unique: true, sparse: true },
 		name: { type: String, required: true, trim: true },
 		category: { type: String, required: true },
 		description: { type: String },
