@@ -7,12 +7,14 @@ const Product = require("../models/Product");
 const SubscriptionPlan = require("../models/SubscriptionPlan");
 const DiscountRule = require("../models/DiscountRule");
 const DiscountTierConfig = require("../models/DiscountTierConfig");
+const DiscountCategoryConfig = require("../models/DiscountCategoryConfig");
 const Warehouse = require("../models/Warehouse");
 const customers = require("./customers");
 const products = require("./products");
 const subscriptionPlans = require("./subscriptionPlans");
 const discountRules = require("./discountRules");
 const discountTierConfigs = require("./discountTierConfigs");
+const discountCategoryConfigs = require("./discountCategoryConfigs");
 const warehouses = require("./warehouses");
 
 const seed = async () => {
@@ -24,14 +26,16 @@ const seed = async () => {
 			SubscriptionPlan.deleteMany({}),
 			DiscountRule.deleteMany({}),
 			DiscountTierConfig.deleteMany({}),
+			DiscountCategoryConfig.deleteMany({}),
 			Warehouse.deleteMany({}),
 		]);
-		const [createdCustomers, createdProducts, createdPlans, createdRules, createdTierConfigs, createdWarehouses] = await Promise.all([
+		const [createdCustomers, createdProducts, createdPlans, createdRules, createdTierConfigs, createdCategoryConfigs, createdWarehouses] = await Promise.all([
 			Customer.insertMany(customers),
 			Product.insertMany(products),
 			SubscriptionPlan.insertMany(subscriptionPlans),
 			DiscountRule.insertMany(discountRules),
 			DiscountTierConfig.insertMany(discountTierConfigs),
+			DiscountCategoryConfig.insertMany(discountCategoryConfigs),
 			Warehouse.insertMany(warehouses),
 		]);
 		console.log(`Seeded ${createdCustomers.length} customers`);
@@ -39,6 +43,7 @@ const seed = async () => {
 		console.log(`Seeded ${createdPlans.length} subscription plans`);
 		console.log(`Seeded ${createdRules.length} discount rules`);
 		console.log(`Seeded ${createdTierConfigs.length} discount tier configs`);
+		console.log(`Seeded ${createdCategoryConfigs.length} discount category configs`);
 		console.log(`Seeded ${createdWarehouses.length} warehouses`);
 	} catch (error) {
 		console.error("Seed failed:", error.message);
