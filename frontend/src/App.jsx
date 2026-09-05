@@ -27,6 +27,8 @@ import ProductCatalogPage from "./pages/ProductCatalogPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import DiscountConfigPage from "./pages/DiscountConfigPage";
 import AdminResourcePage from "./pages/AdminResourcePage";
+import WarehousePage from "./pages/WarehousePage";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminShell from "./components/AdminShell";
 import ProtectedInternalRoute from "./routes/ProtectedInternalRoute";
 import ProtectedPortalRoute from "./routes/ProtectedPortalRoute";
@@ -68,9 +70,10 @@ function App() {
 							{/* Admin configuration routes */}
 							<Route element={<RoleRoute allowedRoles={[USER_ROLES.ADMIN]} />}>
 								<Route element={<AdminShell />}>
+									<Route path="/admin/dashboard" element={<AdminDashboard />} />
 									<Route path="/catalog" element={<ProductCatalogPage />} />
 									<Route path="/catalog/:id" element={<ProductDetailPage />} />
-									<Route path="/admin/warehouses" element={<AdminResourcePage resource="warehouses" />} />
+									<Route path="/admin/warehouses" element={<WarehousePage />} />
 									<Route path="/admin/subscription-plans" element={<AdminResourcePage resource="subscriptionPlans" />} />
 								</Route>
 							</Route>
