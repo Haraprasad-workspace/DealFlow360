@@ -2,7 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AuthTokenProvider from "./components/AuthTokenProvider";
 import AuthPage from "./pages/AuthPage";
 import DashboardPlaceholder from "./pages/DashboardPlaceholder";
-import PortalPlaceholder from "./pages/PortalPlaceholder";
+import CustomerDashboardPage from "./pages/CustomerDashboardPage";
+import PortalListPage from "./pages/PortalListPage";
+import PortalDetailPage from "./pages/PortalDetailPage";
 import ProductCatalogPage from "./pages/ProductCatalogPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import DiscountConfigPage from "./pages/DiscountConfigPage";
@@ -30,7 +32,9 @@ function App() {
 					</Route>
 
 					<Route element={<ProtectedPortalRoute />}>
-						<Route path="/portal" element={<PortalPlaceholder />} />
+						<Route path="/portal" element={<CustomerDashboardPage />} />
+						<Route path="/portal/:resource" element={<PortalListPage />} />
+						<Route path="/portal/:resource/:id" element={<PortalDetailPage />} />
 					</Route>
 
 					<Route path="/" element={<Navigate to="/auth" replace />} />
