@@ -6,6 +6,9 @@ const quotationItemSchema = new mongoose.Schema(
 		quantity: { type: Number, required: true, min: 1 },
 		unitPrice: { type: Number, min: 0 },
 		discount: { type: Number, min: 0, max: 100 },
+		lineStatus: { type: String, enum: ["OK", "OVER", "NO_CONFIG"] },
+		overagePoints: { type: Number, min: 0 },
+		effectiveLimitPct: { type: Number, min: 0, max: 100 },
 		tax: { type: Number, min: 0 },
 		total: { type: Number, min: 0 },
 		margin: { type: Number },
@@ -26,6 +29,11 @@ const quotationSchema = new mongoose.Schema(
 		margin: { type: Number },
 		riskScore: { type: Number, min: 0 },
 		riskLevel: { type: String, enum: ["LOW", "MEDIUM", "HIGH"] },
+		blendedRisk: { type: String, enum: ["LOW", "MEDIUM", "HIGH"] },
+		approvalStage: {
+			type: String,
+			enum: ["NONE_REQUIRED", "PENDING_MANAGER", "PENDING_FINANCE", "APPROVED", "RETURNED", "REJECTED"],
+		},
 		status: {
 			type: String,
 			enum: [
@@ -47,6 +55,13 @@ const quotationSchema = new mongoose.Schema(
 				enum: ["NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"],
 			},
 		},
+		approvalAuditLog: [{
+			userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+			userName: { type: String },
+			action: { type: String, enum: ["SUBMITTED", "APPROVED", "RETURNED", "REJECTED", "RESUBMITTED"] },
+			note: { type: String },
+			timestamp: { type: Date, default: Date.now },
+		}],
 	},
 	{ timestamps: true },
 );

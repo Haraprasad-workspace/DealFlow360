@@ -5,7 +5,6 @@ const cors = require("cors");
 const { clerkMiddleware } = require("@clerk/express");
 const connectDB = require("./config/mongoose_config");
 const validateClerkEnv = require("./config/validateClerkEnv");
-const errorHandler = require("./middleware/errorHandler");
 const meRoutes = require("./routes/me.routes");
 const internalRoutes = require("./routes/internal/index");
 const portalRoutes = require("./routes/portal/index");
