@@ -13,6 +13,10 @@ const resources = { products: "products", discountTiers: "discountTiers", wareho
 Object.entries(resources).forEach(([resource, scope]) => {
 	const resourceRouter = require("express").Router();
 	const resourceAuth = [...auth, configurePermission(scope)];
+	resourceRouter.use((req, _res, next) => {
+		req.params.resource = resource;
+		next();
+	});
 	resourceRouter.get("/", ...resourceAuth, validate(schemas.list), controller.list);
 	resourceRouter.get("/:id", ...resourceAuth, validate(schemas.id), controller.get);
 	resourceRouter.post("/", ...resourceAuth, validate(schemas.create[resource]), controller.create);
