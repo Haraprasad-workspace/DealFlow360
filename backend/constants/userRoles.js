@@ -1,0 +1,25 @@
+const USER_ROLES = {
+	SALES_REP: "SALES_REP",
+	SALES_MANAGER: "SALES_MANAGER",
+	FINANCE: "FINANCE",
+	ADMIN: "ADMIN",
+	CUSTOMER: "CUSTOMER",
+};
+
+const INTERNAL_ROLES = [
+	USER_ROLES.SALES_REP,
+	USER_ROLES.SALES_MANAGER,
+	USER_ROLES.FINANCE,
+	USER_ROLES.ADMIN,
+];
+
+const ALL_ROLES = Object.values(USER_ROLES);
+
+const isValidRole = (role) => ALL_ROLES.includes(role);
+
+module.exports = {
+	USER_ROLES,
+	INTERNAL_ROLES,
+	ALL_ROLES,
+	isValidRole,
+};
