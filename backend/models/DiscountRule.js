@@ -1,3 +1,4 @@
+// DEPRECATED: superseded by DiscountTierConfig + DiscountCategoryConfig. Not read at runtime. Kept for data-migration safety.
 const mongoose = require("mongoose");
 
 const discountRuleSchema = new mongoose.Schema(

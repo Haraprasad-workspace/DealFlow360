@@ -5,7 +5,6 @@ require("../models/User");
 const productService = require("./product.service");
 const pricingService = require("./pricing.service");
 const discountService = require("./discount.service");
-const approvalService = require("./approval.service");
 
 const fail = (message, status = 400) => {
 	const error = new Error(message);
@@ -35,8 +34,25 @@ const calculateQuotation = async (items, customer) => {
 	const enrichedItems = normalized.map((item) => ({ ...item, product: productMap.get(String(item.productId)) }));
 	const pricing = pricingService.calculateQuotationPricing(enrichedItems, customer);
 	const risk = await discountService.calculateRisk({ items: enrichedItems, customer });
-	const approval = approvalService.determineApproval({ grandTotal: pricing.grandTotal, margin: pricing.margin, riskScore: risk.riskScore });
-	return { ...pricing, riskScore: risk.riskScore, riskLevel: risk.riskLevel, approval };
+	const approval = {
+		required: risk.requiredApprovalStage !== "NONE_REQUIRED",
+		currentLevel: risk.requiredApprovalStage === "PENDING_FINANCE"
+			? "FINANCE"
+			: risk.requiredApprovalStage === "PENDING_MANAGER"
+				? "MANAGER"
+				: "NONE",
+		status: risk.requiredApprovalStage === "NONE_REQUIRED" ? "NOT_REQUIRED" : "PENDING",
+	};
+	return {
+		...pricing,
+		items: risk.linesWithStatus,
+		riskScore: risk.riskScore,
+		riskLevel: risk.riskLevel,
+		blendedRisk: risk.blendedRisk,
+		approvalStage: risk.requiredApprovalStage,
+		approval,
+		configWarnings: risk.configWarnings,
+	};
 };
 
 const quotationService = {
@@ -46,7 +62,14 @@ const quotationService = {
 		const customer = await Customer.findOne({ _id: customerId, isDeleted: { $ne: true } });
 		if (!customer) fail("Customer not found", 404);
 		const calculated = await calculateQuotation(items, customer);
-		return Quotation.create({ quotationNumber: `QT-${Date.now()}`, customer: customerId, salesRep: salesRepId, ...calculated, status: "DRAFT" });
+		return Quotation.create({
+			quotationNumber: `QT-${Date.now()}`,
+			customer: customerId,
+			salesRep: salesRepId,
+			...calculated,
+			status: "DRAFT",
+			approvalAuditLog: [],
+		});
 	},
 	async getQuotations(filters = {}, salesRepId) {
 		const { status, customer, search, dateFrom, dateTo, page = 1, limit = 20 } = filters;
@@ -108,6 +131,15 @@ const quotationService = {
 		const quotation = await this.getEditableQuotation(id, user);
 		quotation.status = quotation.approval.required ? "PENDING_APPROVAL" : "APPROVED";
 		quotation.approval.status = quotation.approval.required ? "PENDING" : "NOT_REQUIRED";
+		quotation.approvalStage = quotation.approval.required
+			? quotation.approvalStage
+			: "APPROVED";
+		quotation.approvalAuditLog.push({
+			userId: user?._id || user?.id,
+			userName: user?.name,
+			action: "SUBMITTED",
+			timestamp: new Date(),
+		});
 		return quotation.save();
 	},
 	async cancelQuotation(id, user) {

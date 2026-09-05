@@ -1,32 +1,30 @@
-const DiscountRule = require("../models/DiscountRule");
+const DiscountTierConfig = require("../models/DiscountTierConfig");
+const DiscountCategoryConfig = require("../models/DiscountCategoryConfig");
+const ApprovalConfig = require("../models/ApprovalConfig");
+const { calculateBlendedRisk } = require("./riskEngine");
 
-const defaultLimits = {
-	BRONZE: 5,
-	SILVER: 10,
-	GOLD: 15,
-};
+const calculateRisk = async ({ items, customer }) => {
+	const categories = [...new Set((items || []).map((item) => item.product?.category || item.category).filter(Boolean))];
+	const [tierConfigs, categoryConfigs, approvalConfig] = await Promise.all([
+		DiscountTierConfig.find({ customerTier: customer?.tier, category: { $in: categories }, isActive: true }).lean(),
+		DiscountCategoryConfig.find({ category: { $in: categories }, isActive: true }).lean(),
+		ApprovalConfig.findOne().sort({ version: -1 }).lean(),
+	]);
+	if (!customer?.tier) throw new Error("Customer tier is required for discount risk calculation");
+	if (!approvalConfig?.rules?.length) throw new Error("Discount approval configuration is not configured");
 
-const getAllowedDiscount = async (customerTier = "BRONZE", category) => {
-	const rule = await DiscountRule.findOne({ customerTier, category, isActive: true }).lean();
-	return rule?.maxDiscount ?? defaultLimits[customerTier] ?? defaultLimits.BRONZE;
-};
-
-const validateLineDiscount = async (item, customer) => {
-	const requestedDiscount = Number(item.discount || 0);
-	const allowedDiscount = await getAllowedDiscount(customer?.tier, item.product?.category || item.category);
-	const excess = Math.max(0, requestedDiscount - allowedDiscount);
-	return { allowed: excess === 0, allowedDiscount, requestedDiscount, excess };
-};
-
-const calculateRisk = async (quotation) => {
-	const results = await Promise.all((quotation.items || []).map((item) => validateLineDiscount(item, quotation.customer)));
-	const violations = results.filter((result) => !result.allowed);
-	const excess = violations.reduce((total, result) => total + result.excess, 0);
-	const riskScore = Math.min(100, excess * 5 + violations.length * 10);
+	const result = calculateBlendedRisk({
+		items,
+		customerTier: customer.tier,
+		tierConfigs,
+		categoryConfigs,
+		approvalRules: approvalConfig.rules,
+	});
 	return {
-		riskScore,
-		riskLevel: riskScore >= 70 ? "HIGH" : riskScore >= 30 ? "MEDIUM" : "LOW",
-		violations,
+		...result,
+		riskScore: result.blendedOverage,
+		riskLevel: result.blendedRisk,
+		violations: result.linesWithStatus.filter((line) => line.lineStatus === "OVER"),
 	};
 };
 
@@ -44,4 +42,4 @@ const validateDiscounts = async (items, customer) => {
 	return customer ? calculateRisk({ items, customer }) : items;
 };
 
-module.exports = { getAllowedDiscount, validateLineDiscount, calculateRisk, validateDiscounts };
+module.exports = { calculateRisk, validateDiscounts };
