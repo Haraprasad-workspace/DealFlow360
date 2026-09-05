@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
+import { useSignUp } from "@clerk/react/legacy";
 import AuthNavbar from "../components/auth/AuthNavbar";
+import AuthSyncError from "../components/auth/AuthSyncError";
 import AuthTabs from "../components/auth/AuthTabs";
 import HelperBanner from "../components/auth/HelperBanner";
 import SignInPanel from "../components/auth/SignInPanel";
@@ -9,11 +11,30 @@ import SignUpForm from "../components/auth/SignUpForm";
 import { getHomeRouteForRole } from "../constants/roles";
 import useCurrentUser from "../hooks/useCurrentUser";
 
+const getSyncErrorMessage = (error) => {
+	const status = error?.response?.status;
+	const serverMessage = error?.response?.data?.details;
+
+	if (status === 500 && serverMessage?.includes("Clerk")) {
+		return "Backend Clerk keys are missing or invalid. Add CLERK_SECRET_KEY and CLERK_PUBLISHABLE_KEY to backend/.env, then restart the server.";
+	}
+
+	if (status === 401) {
+		return "Your session could not be verified. Try logging out and signing in again.";
+	}
+
+	return (
+		serverMessage ||
+		error?.response?.data?.error ||
+		"Unable to sync your account with the server."
+	);
+};
+
 const AuthPage = () => {
 	const [activeTab, setActiveTab] = useState("login");
 	const navigate = useNavigate();
 	const { isSignedIn } = useAuth();
-	const { user, loading, refetch } = useCurrentUser();
+	const { user, loading, error, refetch } = useCurrentUser();
 
 	useEffect(() => {
 		if (isSignedIn && user && !loading) {
@@ -28,6 +49,14 @@ const AuthPage = () => {
 			navigate(getHomeRouteForRole(syncedUser.role), { replace: true });
 		}
 	};
+
+	if (isSignedIn && loading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[#FAFAFC] text-sm text-[#5C5D6E]">
+				Signing you in...
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-[#FAFAFC] px-4 py-10 font-['Inter',sans-serif] text-[#1A1B25]">
@@ -44,15 +73,26 @@ const AuthPage = () => {
 						</p>
 					</div>
 
-					<AuthTabs activeTab={activeTab} onTabChange={setActiveTab} />
+					{isSignedIn && error ? (
+						<AuthSyncError
+							message={getSyncErrorMessage(error)}
+							onRetry={refetch}
+						/>
+					) : null}
 
-					<div>
-						{activeTab === "login" ? (
-							<SignInPanel />
-						) : (
-							<SignUpForm onComplete={handleSignUpComplete} />
-						)}
-					</div>
+					{!isSignedIn ? (
+						<>
+							<AuthTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+							<div>
+								{activeTab === "login" ? (
+									<SignInPanel />
+								) : (
+									<SignUpForm onComplete={handleSignUpComplete} />
+								)}
+							</div>
+						</>
+					) : null}
 
 					<HelperBanner />
 				</div>

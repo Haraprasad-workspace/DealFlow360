@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const { clerkMiddleware } = require("@clerk/express");
 const connectDB = require("./config/mongoose_config");
+const validateClerkEnv = require("./config/validateClerkEnv");
+const errorHandler = require("./middleware/errorHandler");
 const meRoutes = require("./routes/me.routes");
 const internalRoutes = require("./routes/internal/index");
 const portalRoutes = require("./routes/portal/index");
@@ -27,8 +29,11 @@ app.get("/health", (_request, response) => {
 	response.json({ status: "ok" });
 });
 
+app.use(errorHandler);
+
 const startServer = async () => {
 	try {
+		validateClerkEnv();
 		await connectDB();
 
 		app.listen(port, () => {
