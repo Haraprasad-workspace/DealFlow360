@@ -36,7 +36,8 @@ const useCurrentUser = () => {
 			return;
 		}
 
-		fetchUser();
+		const timer = window.setTimeout(fetchUser, 0);
+		return () => window.clearTimeout(timer);
 	}, [isLoaded, fetchUser]);
 
 	return {

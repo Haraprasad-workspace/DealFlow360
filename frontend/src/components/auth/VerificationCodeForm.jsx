@@ -1,9 +1,9 @@
 const VerificationCodeForm = ({ code, onCodeChange, onSubmit, isSubmitting, error }) => (
-	<form className="space-y-4" onSubmit={onSubmit}>
+	<form className="auth-form" onSubmit={onSubmit}>
 		<div>
 			<label
 				htmlFor="verification-code"
-				className="mb-1.5 block text-sm font-medium text-[#1A1B25]"
+				className="auth-form-label"
 			>
 				Verification Code
 			</label>
@@ -14,14 +14,14 @@ const VerificationCodeForm = ({ code, onCodeChange, onSubmit, isSubmitting, erro
 				autoComplete="one-time-code"
 				value={code}
 				onChange={(event) => onCodeChange(event.target.value)}
-				className="w-full rounded-lg border border-[#D6D7E4] bg-white px-3 py-2.5 text-sm text-[#1A1B25] outline-none focus:border-[#5B4CF5] focus:ring-[3px] focus:ring-[#EFEDFF]"
+				className="auth-form-input"
 				placeholder="Enter the code sent to your email"
 				required
 			/>
 		</div>
 
 		{error ? (
-			<p className="text-sm text-red-600" role="alert">
+			<p className="auth-form-error" role="alert">
 				{error}
 			</p>
 		) : null}
@@ -29,7 +29,7 @@ const VerificationCodeForm = ({ code, onCodeChange, onSubmit, isSubmitting, erro
 		<button
 			type="submit"
 			disabled={isSubmitting}
-			className="w-full rounded-lg bg-[#5B4CF5] px-[18px] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#4534E0] disabled:cursor-not-allowed disabled:opacity-70"
+			className="auth-submit-button"
 		>
 			{isSubmitting ? "Verifying..." : "Verify Email"}
 		</button>

@@ -17,9 +17,13 @@ const createQuotation = async (req, res, next) => {
 	try {
 		const { customerId, items } = req.body;
 		const repId = salesRepId(req);
+		console.info("[quotation] create request", { customerId, itemCount: items?.length || 0, salesRepId: repId });
 		if (!customerId || !Array.isArray(items) || !repId) return res.status(400).json({ message: "customerId, items, and sales representative are required" });
-		return res.status(201).json(await quotationService.createQuotation(customerId, repId, items));
+		const quotation = await quotationService.createQuotation(customerId, repId, items);
+		console.info("[quotation] create success", { quotationId: quotation._id });
+		return res.status(201).json(quotation);
 	} catch (error) {
+		console.error("[quotation] create failed", { message: error.message, status: error.status, stack: error.stack });
 		return handleError(error, res, next);
 	}
 };

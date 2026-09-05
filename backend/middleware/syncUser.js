@@ -62,6 +62,7 @@ const syncUser = async (request, response, next) => {
 			await user.save();
 		}
 
+		console.info(`[syncUser] Synced user '${user.email}' (${user.role}) | teamId: ${user.teamId || "none"}`);
 		request.user = user;
 		next();
 	} catch (error) {

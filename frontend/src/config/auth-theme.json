@@ -1,0 +1,48 @@
+{
+  "name": "DealFlow360 Workspace Auth",
+  "direction": "quiet sales operations workspace",
+  "palette": {
+    "canvas": "#F4F1EA",
+    "paper": "#FFFDF8",
+    "ink": "#18221F",
+    "inkMuted": "#737A72",
+    "sidebar": "#16201D",
+    "sidebarMuted": "#AEB9AD",
+    "action": "#BB6B43",
+    "actionHover": "#A85C39",
+    "sage": "#D9E1D1",
+    "sageStrong": "#60816A",
+    "line": "#DFD9CE",
+    "warning": "#F2E6BF",
+    "warningInk": "#906A31",
+    "error": "#F2DED8",
+    "errorInk": "#955347"
+  },
+  "typography": {
+    "bodyFont": "DM Sans",
+    "displayFont": "Space Grotesk",
+    "utilityFont": "DM Mono",
+    "pageTitle": "52px / 1 / 600",
+    "formTitle": "32px / 1.1 / 600",
+    "body": "16px / 1.55 / 400",
+    "label": "15px / 1.3 / 600",
+    "utility": "13px / 1.3 / 500"
+  },
+  "shape": {
+    "cardRadius": "0px",
+    "controlRadius": "0px",
+    "avatarRadius": "50%",
+    "border": "1px solid #DFD9CE"
+  },
+  "authLayout": {
+    "desktop": "dark brand panel beside a light Clerk form panel",
+    "mobile": "brand panel stacks above the form",
+    "maxWidth": "1180px",
+    "minimumReadableBodySize": "16px"
+  },
+  "interaction": {
+    "primaryAction": "terracotta fill with darker hover state",
+    "focusRing": "sage border with soft sage halo",
+    "errorFeedback": "inline warm red panel without exposing implementation details"
+  }
+}

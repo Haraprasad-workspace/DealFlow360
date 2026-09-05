@@ -92,7 +92,7 @@ const SignUpForm = ({ onComplete }) => {
 
 	if (!isLoaded) {
 		return (
-			<p className="text-sm text-[#5C5D6E]">Loading sign-up form...</p>
+			<p className="auth-loading-copy">Loading sign-up form...</p>
 		);
 	}
 
@@ -109,11 +109,11 @@ const SignUpForm = ({ onComplete }) => {
 	}
 
 	return (
-		<form className="space-y-4" onSubmit={handleSignUpSubmit}>
+		<form className="auth-form" onSubmit={handleSignUpSubmit}>
 			<div>
 				<label
 					htmlFor="signup-name"
-					className="mb-1.5 block text-sm font-medium text-[#1A1B25]"
+					className="auth-form-label"
 				>
 					Name
 				</label>
@@ -122,7 +122,7 @@ const SignUpForm = ({ onComplete }) => {
 					type="text"
 					value={name}
 					onChange={(event) => setName(event.target.value)}
-					className="w-full rounded-lg border border-[#D6D7E4] bg-white px-3 py-2.5 text-sm text-[#1A1B25] outline-none focus:border-[#5B4CF5] focus:ring-[3px] focus:ring-[#EFEDFF]"
+					className="auth-form-input"
 					required
 				/>
 			</div>
@@ -130,7 +130,7 @@ const SignUpForm = ({ onComplete }) => {
 			<div>
 				<label
 					htmlFor="signup-email"
-					className="mb-1.5 block text-sm font-medium text-[#1A1B25]"
+					className="auth-form-label"
 				>
 					Email
 				</label>
@@ -139,7 +139,7 @@ const SignUpForm = ({ onComplete }) => {
 					type="email"
 					value={email}
 					onChange={(event) => setEmail(event.target.value)}
-					className="w-full rounded-lg border border-[#D6D7E4] bg-white px-3 py-2.5 text-sm text-[#1A1B25] outline-none focus:border-[#5B4CF5] focus:ring-[3px] focus:ring-[#EFEDFF]"
+					className="auth-form-input"
 					required
 				/>
 			</div>
@@ -147,7 +147,7 @@ const SignUpForm = ({ onComplete }) => {
 			<div>
 				<label
 					htmlFor="signup-password"
-					className="mb-1.5 block text-sm font-medium text-[#1A1B25]"
+					className="auth-form-label"
 				>
 					Password
 				</label>
@@ -156,7 +156,7 @@ const SignUpForm = ({ onComplete }) => {
 					type="password"
 					value={password}
 					onChange={(event) => setPassword(event.target.value)}
-					className="w-full rounded-lg border border-[#D6D7E4] bg-white px-3 py-2.5 text-sm text-[#1A1B25] outline-none focus:border-[#5B4CF5] focus:ring-[3px] focus:ring-[#EFEDFF]"
+					className="auth-form-input"
 					required
 				/>
 			</div>
@@ -164,7 +164,7 @@ const SignUpForm = ({ onComplete }) => {
 			<div>
 				<label
 					htmlFor="signup-role"
-					className="mb-1.5 block text-sm font-medium text-[#1A1B25]"
+					className="auth-form-label"
 				>
 					Role
 				</label>
@@ -172,7 +172,7 @@ const SignUpForm = ({ onComplete }) => {
 					id="signup-role"
 					value={role}
 					onChange={(event) => setRole(event.target.value)}
-					className="w-full rounded-lg border border-[#D6D7E4] bg-white px-3 py-2.5 text-sm text-[#1A1B25] outline-none focus:border-[#5B4CF5] focus:ring-[3px] focus:ring-[#EFEDFF]"
+					className="auth-form-input"
 					required
 				>
 					{ROLE_OPTIONS.map((option) => (
@@ -184,7 +184,7 @@ const SignUpForm = ({ onComplete }) => {
 			</div>
 
 			{error ? (
-				<p className="text-sm text-red-600" role="alert">
+				<p className="auth-form-error" role="alert">
 					{error}
 				</p>
 			) : null}
@@ -192,7 +192,7 @@ const SignUpForm = ({ onComplete }) => {
 			<button
 				type="submit"
 				disabled={isSubmitting}
-				className="w-full rounded-lg bg-[#5B4CF5] px-[18px] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#4534E0] disabled:cursor-not-allowed disabled:opacity-70"
+				className="auth-submit-button"
 			>
 				{isSubmitting ? "Creating account..." : "Sign Up"}
 			</button>

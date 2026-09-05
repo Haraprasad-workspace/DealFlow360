@@ -1,11 +1,12 @@
 const router = require("express").Router();
 const controller = require("../controllers/quotation.controller");
-const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const validate = require("../middlewares/validate");
 const quotationValidator = require("../validators/quotation.validator");
+const salesRepAuth = require("../middleware/salesRepAuth");
 
-const salesAccess = [authenticate, authorize("SALES_REP", "ADMIN")];
+const salesAccess = salesRepAuth;
 
+// Every quotation operation receives the synchronized User document as req.user.
 router.post("/", ...salesAccess, validate(quotationValidator.createQuotation), controller.createQuotation);
 router.get("/", ...salesAccess, validate(quotationValidator.listQuotations), controller.getQuotations);
 router.get("/:quotationId/recommendations", ...salesAccess, controller.getRecommendations);

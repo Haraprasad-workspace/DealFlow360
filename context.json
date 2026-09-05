@@ -1,0 +1,314 @@
+{
+  "project": {
+    "name": "DealFlow360",
+    "type": "MERN B2B sales operations platform",
+    "workspace": "DealFlow360",
+    "contextPurpose": "Portable project context covering backend and frontend work completed so far.",
+    "securityNote": "This file intentionally contains no passwords, tokens, database credentials, or Clerk secrets."
+  },
+  "architecture": {
+    "backendFlow": "Route -> Middleware -> Controller -> Service -> Mongoose Model -> MongoDB",
+    "frontendFlow": "React Route -> Protected Route -> Page -> API Client -> Express API",
+    "authenticationFlow": "Clerk session -> Clerk middleware -> syncUser -> req.user -> role authorization -> controller",
+    "businessLogicRule": "Pricing, discounts, risk, approval, team access, and aggregations belong in services, not routes or controllers."
+  },
+  "authentication": {
+    "provider": "Clerk",
+    "ownedBy": "Authentication teammate",
+    "implemented": [
+      "Clerk middleware in backend/middleware/clerkAuth.js",
+      "Database user synchronization in backend/middleware/syncUser.js",
+      "Role authorization in backend/middleware/requireRole.js",
+      "Frontend ClerkProvider",
+      "Frontend Clerk token injection into Axios requests",
+      "Frontend /api/me synchronization through useCurrentUser"
+    ],
+    "userDocument": {
+      "model": "User",
+      "fieldsUsed": ["clerkUserId", "email", "name", "role", "companyId", "teamId", "permissions", "lastLoginAt"],
+      "teamRelationship": "Sales Manager and Sales Representatives share teamId. Manager services use the authenticated manager _id to resolve that team."
+    },
+    "roles": ["SALES_REP", "SALES_MANAGER", "FINANCE", "ADMIN", "CUSTOMER"],
+    "salesRepRouteRoles": ["SALES_REP", "ADMIN"],
+    "managerRouteRole": "SALES_MANAGER",
+    "notImplemented": [
+      "JWT authentication",
+      "Custom login logic",
+      "Custom password hashing",
+      "Replacement of the teammate Clerk implementation"
+    ]
+  },
+  "backend": {
+    "runtime": "Node.js CommonJS",
+    "framework": "Express",
+    "database": "MongoDB with Mongoose",
+    "dependencies": ["express", "mongoose", "dotenv", "cors", "joi", "@clerk/express"],
+    "scripts": {
+      "start": "node app.js",
+      "dev": "node --watch app.js",
+      "seed": "node seed/seed.js"
+    },
+    "entryPoint": "backend/app.js",
+    "middlewareOrder": [
+      "dotenv configuration",
+      "Express initialization",
+      "cors",
+      "express.json",
+      "requestLogger",
+      "Clerk middleware",
+      "API routes",
+      "notFound",
+      "centralized errorHandler"
+    ],
+    "routes": {
+      "salesRepresentative": {
+        "customers": {
+          "base": "/api/customers",
+          "endpoints": [
+            "POST /api/customers",
+            "GET /api/customers",
+            "GET /api/customers/:customerId",
+            "PUT /api/customers/:customerId",
+            "DELETE /api/customers/:customerId"
+          ]
+        },
+        "products": {
+          "base": "/api/products",
+          "endpoints": [
+            "GET /api/products",
+            "GET /api/products/:productId",
+            "GET /api/products/category/:category"
+          ]
+        },
+        "quotations": {
+          "base": "/api/quotations",
+          "endpoints": [
+            "POST /api/quotations",
+            "GET /api/quotations",
+            "GET /api/quotations/:quotationId",
+            "PUT /api/quotations/:quotationId",
+            "DELETE /api/quotations/:quotationId",
+            "POST /api/quotations/:quotationId/items",
+            "PUT /api/quotations/:quotationId/items/:itemId",
+            "DELETE /api/quotations/:quotationId/items/:itemId",
+            "POST /api/quotations/:quotationId/submit",
+            "POST /api/quotations/:quotationId/cancel",
+            "GET /api/quotations/:quotationId/recommendations"
+          ]
+        },
+        "orders": {
+          "base": "/api/orders",
+          "endpoints": [
+            "POST /api/orders/from-quotation/:quotationId",
+            "GET /api/orders",
+            "GET /api/orders/:orderId",
+            "POST /api/orders/:orderId/cancel"
+          ]
+        }
+      },
+      "salesManager": {
+        "dashboard": ["GET /api/manager/dashboard"],
+        "quotations": [
+          "GET /api/manager/quotations",
+          "GET /api/manager/quotations/stats",
+          "GET /api/manager/quotations/:quotationId"
+        ],
+        "approvals": [
+          "GET /api/manager/approvals",
+          "GET /api/manager/approvals/:quotationId",
+          "POST /api/manager/approvals/:quotationId/approve",
+          "POST /api/manager/approvals/:quotationId/reject"
+        ],
+        "orders": [
+          "GET /api/manager/orders",
+          "GET /api/manager/orders/stats",
+          "GET /api/manager/orders/:orderId"
+        ],
+        "reports": [
+          "GET /api/manager/reports/sales",
+          "GET /api/manager/reports/team",
+          "GET /api/manager/reports/products"
+        ],
+        "security": "Every manager route uses Clerk authentication, syncUser, and requireRole([SALES_MANAGER]). Manager IDs are taken from req.user._id, never request data."
+      }
+    },
+    "models": {
+      "implemented": [
+        "User.js",
+        "Customer.js",
+        "Product.js",
+        "SubscriptionPlan.js",
+        "Quotation.js",
+        "Order.js",
+        "DiscountRule.js",
+        "AuditLog.js"
+      ],
+      "customer": ["name", "email", "phone", "company", "tier", "address", "isDeleted", "deletedAt", "timestamps"],
+      "product": ["name", "category", "description", "price", "costPrice", "unit", "taxRate", "variants", "isRecurring", "isActive", "timestamps"],
+      "quotation": ["quotationNumber", "customer", "salesRep", "items", "subtotal", "discountTotal", "taxTotal", "grandTotal", "margin", "riskScore", "riskLevel", "status", "approval", "timestamps"],
+      "order": ["orderNumber", "quotation", "customer", "salesRep", "items", "subtotal", "discountTotal", "taxTotal", "grandTotal", "status", "timestamps"],
+      "auditLog": ["action", "actor", "entity", "entityId", "details", "timestamps"]
+    },
+    "services": {
+      "salesRepresentative": [
+        "customer.service.js: customer CRUD, search, tier filtering, pagination, duplicate email checks, soft deletion, active transaction checks",
+        "product.service.js: active product lookup, category/search filtering, pagination, product validation",
+        "pricing.service.js: pure monetary calculations including gross, discount, tax, total, cost, profit, and margin",
+        "discount.service.js: tier/category discount limits, excess discount detection, risk interface",
+        "approval.service.js: approval requirement decisions",
+        "recommendation.service.js: basic positive-margin product recommendations",
+        "quotation.service.js: quotation workflow orchestration, product/customer validation, recalculation, risk, approval, submission, cancellation",
+        "order.service.js: approved quotation conversion, order listing/details/cancellation",
+        "audit.service.js: shared audit record creation"
+      ],
+      "salesManager": [
+        "managerDashboard.service.js: manager KPIs, team performance, recent activity, risk overview",
+        "managerQuotation.service.js: team scope resolution, team quotation listing/details/stats",
+        "managerApproval.service.js: pending approvals, team ownership checks, approve/reject transitions, audit writes",
+        "managerOrder.service.js: team order listing/details/stats",
+        "managerReport.service.js: sales, team, and product performance reports"
+      ],
+      "managerAccessRule": "A manager must have a teamId. Services find SALES_REP users sharing that teamId and optional companyId, then filter quotation/order salesRep fields by those IDs."
+    },
+    "controllers": {
+      "salesRepresentative": ["customer.controller.js", "product.controller.js", "quotation.controller.js", "order.controller.js"],
+      "salesManager": ["managerDashboard.controller.js", "managerQuotation.controller.js", "managerApproval.controller.js", "managerOrder.controller.js", "managerReport.controller.js"],
+      "controllerRule": "Controllers translate request data to service calls and forward errors; they do not calculate pricing, risk, discounts, or approval rules."
+    },
+    "validation": {
+      "library": "Joi",
+      "middleware": "backend/middlewares/validate.js",
+      "sharedManagerValidator": "backend/validators/manager.validator.js",
+      "checks": ["required fields", "ObjectId shape", "pagination", "status/risk enums", "date ranges", "rejection reasons", "basic numeric ranges"],
+      "businessRulesExcluded": true
+    },
+    "errors": {
+      "appError": "backend/utils/AppError.js",
+      "handler": "backend/middleware/errorHandler.js",
+      "notFound": "backend/middlewares/notFound.js",
+      "responseShape": {
+        "success": false,
+        "message": "Human-readable message",
+        "errors": []
+      },
+      "mongooseHandling": ["ValidationError", "CastError", "duplicate key E11000"],
+      "sensitiveDetails": "Stack traces and database credentials are not returned to clients."
+    },
+    "logging": {
+      "logger": "backend/utils/logger.js",
+      "requestLogger": "backend/middlewares/requestLogger.js",
+      "requestFormat": "METHOD URL STATUS DURATIONms",
+      "doesNotLog": ["passwords", "tokens", "authorization headers", "request bodies", "sensitive customer data"]
+    },
+    "database": {
+      "connectionFile": "backend/config/mongoose_config.js",
+      "supportedVariables": ["MONGO_URI", "db_uri"],
+      "startupBehavior": "Server starts only after the database connection succeeds.",
+      "seedConnectionBehavior": "Seed connects once and closes the connection in finally."
+    },
+    "seed": {
+      "command": "npm run seed",
+      "files": ["seed.js", "users.js", "customers.js", "products.js", "quotations.js", "orders.js", "discountRules.js", "subscriptionPlans.js"],
+      "repeatability": "Clears demo-owned customers, products, subscriptions, discount rules, quotations, orders, and users with clerkUserId beginning seed-. Non-seed users are preserved.",
+      "demoData": {
+        "manager": 1,
+        "salesReps": 2,
+        "customers": 3,
+        "products": 6,
+        "quotations": 4,
+        "orders": 1,
+        "subscriptionPlans": 2,
+        "discountRules": 6
+      },
+      "quotationStates": ["DRAFT", "PENDING_APPROVAL", "APPROVED", "REJECTED/HIGH-RISK"],
+      "relationships": "Generated ObjectIds and shared generated teamId are used; no hardcoded database ObjectIds."
+    },
+    "environment": {
+      "exampleFile": "backend/.env.example",
+      "exampleContainsOnlyNames": true,
+      "variables": ["MONGO_URI", "db_uri", "PORT", "JWT_SECRET", "CLERK_PUBLISHABLE_KEY", "CLERK_SECRET_KEY"],
+      "jwtNote": "JWT_SECRET is listed for compatibility with the project request, but the current authentication implementation is Clerk-based.",
+      "gitignore": [".env", "node_modules"]
+    }
+  },
+  "frontend": {
+    "runtime": "Vite + React",
+    "libraries": ["React", "React Router", "Axios", "Tailwind CSS v4", "Clerk React"],
+    "authentication": {
+      "provider": "Clerk",
+      "tokenFlow": "AuthTokenProvider obtains getToken and configures the Axios request interceptor.",
+      "userFlow": "useCurrentUser calls /api/me and ProtectedInternalRoute redirects based on the synchronized role."
+    },
+    "apiIntegration": {
+      "client": "frontend/src/api/client.js",
+      "salesRepApi": "frontend/src/api/salesRep.js",
+      "baseUrl": "VITE_API_BASE_URL or Vite proxy /api",
+      "requestBehavior": "Clerk bearer token is attached automatically when available.",
+      "logging": ["request start", "token attachment state", "success status/duration", "failure status/message"]
+    },
+    "salesRepPages": [
+      "Dashboard.jsx",
+      "Customers.jsx",
+      "CustomerDetails.jsx",
+      "Products.jsx",
+      "Quotations.jsx",
+      "CreateQuotation.jsx",
+      "QuotationDetails.jsx",
+      "Orders.jsx",
+      "OrderDetails.jsx"
+    ],
+    "salesRepFeatures": [
+      "Dashboard stats and activity panels",
+      "Customer search/filter/create/details",
+      "Product search/category/recurring browsing",
+      "Quotation list and status filtering",
+      "Quotation builder with customer/product selection, quantity, discount, and backend recalculation",
+      "Quotation detail with totals, margin, risk, approval, submit/cancel, recommendations",
+      "Order list/details/cancellation",
+      "Responsive navigation shell",
+      "Loading and API error states",
+      "Frontend render error boundary"
+    ],
+    "authUi": {
+      "page": "frontend/src/pages/AuthPage.jsx",
+      "components": ["AuthNavbar.jsx", "AuthTabs.jsx", "SignInPanel.jsx", "SignUpForm.jsx", "VerificationCodeForm.jsx", "AuthSyncError.jsx", "HelperBanner.jsx"],
+      "styling": "frontend/src/styles/auth.css",
+      "clerkAppearance": "frontend/src/config/clerkAppearance.js",
+      "themeDocumentation": "frontend/src/config/auth-theme.json",
+      "visualDirection": "Dark ink brand panel, warm paper form panel, terracotta actions, sage focus states, larger readable typography."
+    },
+    "frontendValidation": ["ESLint passes", "Vite production build passes", "Vite dev/preview server served successfully", "VS Code diagnostics pass"]
+  },
+  "testing": {
+    "backend": [
+      "Backend syntax checks",
+      "App import check",
+      "Route module loading",
+      "MongoDB seed execution",
+      "Health endpoint returns 200",
+      "Unknown route returns 404",
+      "Unauthenticated Sales Rep route returns 401",
+      "Unauthenticated Manager route returns 401",
+      "Manager team scope resolves seeded 4 quotations",
+      "Manager approval changes pending quotation to APPROVED",
+      "Approval writes an audit record",
+      "Seeded Sales Rep quotation creation returns 201"
+    ],
+    "frontend": ["ESLint exit code 0", "Production build succeeds", "Auth login/signup visual check", "Frontend server availability check"],
+    "notAutomated": ["Real Clerk user token end-to-end test", "Full browser-authenticated Manager UI flow because Manager frontend pages are not implemented yet"]
+  },
+  "currentGaps": [
+    "Sales Manager frontend pages are not implemented; only Sales Representative frontend pages exist.",
+    "Manager route integration depends on a real Clerk account whose synchronized User has role SALES_MANAGER and a matching teamId.",
+    "Seed Clerk IDs are demo database records and are not authentication accounts by themselves.",
+    "Fulfillment and billing modules are scaffolded but not fully implemented.",
+    "Some legacy modules remain placeholders for future modules."
+  ],
+  "nextRecommendedSteps": [
+    "Create Sales Manager frontend layout and dashboard pages using the manager API routes.",
+    "Create or configure a Clerk Sales Manager account with matching role metadata and teamId mapping.",
+    "Run an authenticated Manager API flow with a real Clerk token.",
+    "Add automated API tests for cross-manager access denial and invalid-state approval transitions.",
+    "Rotate any real credentials that may have been exposed before .env.example was sanitized."
+  ]
+}

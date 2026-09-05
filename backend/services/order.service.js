@@ -10,8 +10,8 @@ const fail = (message, status = 400) => {
 };
 
 const salesRepFilter = (userOrId) => {
-	if (mongoose.isValidObjectId(userOrId)) return { salesRep: userOrId };
 	const id = typeof userOrId === "object" ? userOrId?.id || userOrId?._id : userOrId;
+	if (mongoose.isValidObjectId(id)) return { salesRep: id };
 	return id ? { salesRep: id } : {};
 };
 

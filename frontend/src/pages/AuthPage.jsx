@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/react";
-import { useSignUp } from "@clerk/react/legacy";
 import AuthNavbar from "../components/auth/AuthNavbar";
 import AuthSyncError from "../components/auth/AuthSyncError";
 import AuthTabs from "../components/auth/AuthTabs";
@@ -10,6 +9,7 @@ import SignInPanel from "../components/auth/SignInPanel";
 import SignUpForm from "../components/auth/SignUpForm";
 import { getHomeRouteForRole } from "../constants/roles";
 import useCurrentUser from "../hooks/useCurrentUser";
+import "../styles/auth.css";
 
 const getSyncErrorMessage = (error) => {
 	const status = error?.response?.status;
@@ -52,23 +52,24 @@ const AuthPage = () => {
 
 	if (isSignedIn && loading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-[#FAFAFC] text-sm text-[#5C5D6E]">
+			<div className="auth-loading-screen">
 				Signing you in...
 			</div>
 		);
 	}
 
 	return (
-		<div className="min-h-screen bg-[#FAFAFC] px-4 py-10 font-['Inter',sans-serif] text-[#1A1B25]">
-			<div className="mx-auto w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(30,26,80,0.04),0_2px_8px_rgba(30,26,80,0.06)]">
+		<div className="auth-page">
+			<div className="auth-frame">
 				<AuthNavbar />
 
-				<div className="space-y-6 px-6 py-8">
+				<div className="auth-content">
 					<div>
-						<h2 className="font-['Plus_Jakarta_Sans'] text-2xl font-bold">
+						<p className="auth-eyebrow">Secure workspace access</p>
+						<h2 className="auth-title">
 							Login / Signup
 						</h2>
-						<p className="mt-1 text-sm text-[#5C5D6E]">
+						<p className="auth-subtitle">
 							Entry point for internal users and customers
 						</p>
 					</div>

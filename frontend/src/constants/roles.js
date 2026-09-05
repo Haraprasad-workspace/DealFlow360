@@ -21,5 +21,16 @@ export const ROLE_OPTIONS = [
 	{ label: "Customer", value: USER_ROLES.CUSTOMER },
 ];
 
-export const getHomeRouteForRole = (role) =>
-	role === USER_ROLES.CUSTOMER ? "/portal" : "/dashboard";
+export const getHomeRouteForRole = (role) => {
+	switch (role) {
+		case USER_ROLES.SALES_REP:
+			return "/sales-rep/dashboard";
+		case USER_ROLES.SALES_MANAGER:
+			return "/sales-manager/dashboard";
+		case USER_ROLES.CUSTOMER:
+			return "/portal";
+		default:
+			return "/sales-rep/dashboard";
+	}
+};
+
