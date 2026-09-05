@@ -18,6 +18,7 @@ const customerSchema = new mongoose.Schema(
 			required: true,
 			default: "BRONZE",
 		},
+		isActive: { type: Boolean, default: true },
 		address: {
 			street: String,
 			city: String,
