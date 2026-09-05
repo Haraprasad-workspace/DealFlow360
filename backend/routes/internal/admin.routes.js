@@ -2,12 +2,13 @@ const router = require("express").Router();
 const controller = require("../../controllers/adminConfig.controller");
 const clerkAuth = require("../../middleware/clerkAuth");
 const syncUser = require("../../middleware/syncUser");
-const { authorize } = require("../../middlewares/auth.middleware");
+const requireRole = require("../../middleware/requireRole");
+const { USER_ROLES } = require("../../constants/userRoles");
 const configurePermission = require("../../middlewares/configurePermission");
 const validate = require("../../middlewares/validate");
 const schemas = require("../../validators/adminConfig.validator");
 
-const auth = [clerkAuth, syncUser, authorize("ADMIN", "SALES_MANAGER")];
+const auth = [clerkAuth, syncUser, requireRole([USER_ROLES.ADMIN, USER_ROLES.SALES_MANAGER])];
 const resources = { products: "products", discountTiers: "discountTiers", categoryDiscounts: "discountTiers", warehouses: "warehouses", subscriptionPlans: "subscriptionPlans" };
 const discountAuth = [...auth, configurePermission("approvalChains")];
 

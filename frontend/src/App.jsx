@@ -62,6 +62,23 @@ function App() {
 									<Route path="/quotations" element={<Navigate to="/sales-rep/quotations" replace />} />
 									<Route path="/orders" element={<Navigate to="/sales-rep/orders" replace />} />
 								</Route>
+
+							</Route>
+
+							{/* Admin configuration routes */}
+							<Route element={<RoleRoute allowedRoles={[USER_ROLES.ADMIN]} />}>
+								<Route element={<AdminShell />}>
+									<Route path="/catalog" element={<ProductCatalogPage />} />
+									<Route path="/catalog/:id" element={<ProductDetailPage />} />
+									<Route path="/admin/warehouses" element={<AdminResourcePage resource="warehouses" />} />
+									<Route path="/admin/subscription-plans" element={<AdminResourcePage resource="subscriptionPlans" />} />
+								</Route>
+							</Route>
+
+							<Route element={<RoleRoute allowedRoles={[USER_ROLES.ADMIN, USER_ROLES.SALES_MANAGER]} />}>
+								<Route element={<AdminShell />}>
+									<Route path="/admin/discount-tiers" element={<DiscountConfigPage />} />
+								</Route>
 							</Route>
 
 							{/* Sales Manager Routes */}

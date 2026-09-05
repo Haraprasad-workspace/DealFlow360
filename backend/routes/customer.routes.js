@@ -1,13 +1,13 @@
 const router = require("express").Router();
 const controller = require("../controllers/customer.controller");
-const { authenticate, authorize } = require("../middlewares/auth.middleware");
 const validate = require("../middlewares/validate");
 const customerValidator = require("../validators/customer.validator");
+const salesRepAuth = require("../middleware/salesRepAuth");
 
-router.post("/", authenticate, authorize("SALES_REP", "ADMIN"), validate(customerValidator.createCustomer), controller.createCustomer);
-router.get("/", authenticate, authorize("SALES_REP", "ADMIN"), validate(customerValidator.listCustomers), controller.getCustomers);
-router.get("/:customerId", authenticate, authorize("SALES_REP", "ADMIN"), validate(customerValidator.customerId), controller.getCustomerById);
-router.put("/:customerId", authenticate, authorize("SALES_REP", "ADMIN"), validate(customerValidator.updateCustomer), controller.updateCustomer);
-router.delete("/:customerId", authenticate, authorize("SALES_REP", "ADMIN"), validate(customerValidator.customerId), controller.deleteCustomer);
+router.post("/", ...salesRepAuth, validate(customerValidator.createCustomer), controller.createCustomer);
+router.get("/", ...salesRepAuth, validate(customerValidator.listCustomers), controller.getCustomers);
+router.get("/:customerId", ...salesRepAuth, validate(customerValidator.customerId), controller.getCustomerById);
+router.put("/:customerId", ...salesRepAuth, validate(customerValidator.updateCustomer), controller.updateCustomer);
+router.delete("/:customerId", ...salesRepAuth, validate(customerValidator.customerId), controller.deleteCustomer);
 
 module.exports = router;

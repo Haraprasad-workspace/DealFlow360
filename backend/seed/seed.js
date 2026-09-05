@@ -13,6 +13,7 @@ const Quotation = require("../models/Quotation");
 const Order = require("../models/Order");
 const DiscountTierConfig = require("../models/DiscountTierConfig");
 const DiscountCategoryConfig = require("../models/DiscountCategoryConfig");
+const ApprovalConfig = require("../models/ApprovalConfig");
 const Warehouse = require("../models/Warehouse");
 
 const customers = require("./customers");
@@ -43,6 +44,7 @@ const seed = async () => {
 			Order.deleteMany({}),
 			DiscountTierConfig.deleteMany({}),
 			DiscountCategoryConfig.deleteMany({}),
+			ApprovalConfig.deleteMany({}),
 			Warehouse.deleteMany({}),
 		]);
 
@@ -55,6 +57,7 @@ const seed = async () => {
 			createdUsers,
 			createdTierConfigs,
 			createdCategoryConfigs,
+			createdApprovalConfig,
 			createdWarehouses,
 		] = await Promise.all([
 			Customer.insertMany(customers),
@@ -64,6 +67,14 @@ const seed = async () => {
 			User.insertMany(buildUsers(teamId)),
 			DiscountTierConfig.insertMany(discountTierConfigs),
 			DiscountCategoryConfig.insertMany(discountCategoryConfigs),
+			ApprovalConfig.create({
+				version: 1,
+				rules: [
+					{ minDiscount: 0, maxDiscount: 5, approval: "NONE" },
+					{ minDiscount: 5.01, maxDiscount: 15, approval: "MANAGER" },
+					{ minDiscount: 15.01, maxDiscount: 100, approval: "MANAGER_FINANCE" },
+				],
+			}),
 			Warehouse.insertMany(warehouses),
 		]);
 
@@ -103,6 +114,7 @@ const seed = async () => {
 			discountRules: createdRules.length,
 			discountTierConfigs: createdTierConfigs.length,
 			discountCategoryConfigs: createdCategoryConfigs.length,
+			approvalConfigVersion: createdApprovalConfig.version,
 			warehouses: createdWarehouses.length,
 		});
 
@@ -116,6 +128,7 @@ const seed = async () => {
 		console.log(
 			`Seeded ${createdCategoryConfigs.length} discount category configs`
 		);
+		console.log(`Seeded approval config version ${createdApprovalConfig.version}`);
 		console.log(`Seeded ${createdWarehouses.length} warehouses`);
 	} catch (error) {
 		logger.error("Seed failed", error.message);

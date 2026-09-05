@@ -19,6 +19,7 @@ const managerOrderRoutes = require("./routes/managerOrder.routes");
 const managerReportRoutes = require("./routes/managerReport.routes");
 const requestLogger = require("./middlewares/requestLogger");
 const notFound = require("./middlewares/notFound");
+const errorHandler = require("./middleware/errorHandler");
 const logger = require("./utils/logger");
 
 const app = express();
