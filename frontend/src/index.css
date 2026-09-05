@@ -2,16 +2,36 @@
 @import "tailwindcss";
 
 :root {
+  --canvas: #F4F1EA;
+  --paper: #FFFDF8;
+  --ink: #18221F;
+  --ink-muted: #737A72;
+  --sidebar: #16201D;
+  --sidebar-muted: #AEB9AD;
+  --action: #BB6B43;
+  --action-hover: #A85C39;
+  --sage: #D9E1D1;
+  --sage-strong: #60816A;
+  --line: #DFD9CE;
+  --warning: #F2E6BF;
+  --warning-ink: #906A31;
+  --error: #F2DED8;
+  --error-ink: #955347;
   font-family: "DM Sans", sans-serif;
-  color: #18221f;
-  background: #f4f1ea;
+  color: var(--ink);
+  background: var(--canvas);
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  background: var(--canvas);
+  color: var(--ink);
 }
 
 button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
+*:focus-visible { outline: 0; border-color: var(--sage-strong); box-shadow: 0 0 0 3px rgb(96 129 106 / 18%); }

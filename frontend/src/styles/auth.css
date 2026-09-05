@@ -2,16 +2,16 @@
 .auth-frame { width: min(1180px, 100%); min-height: 670px; display: grid; grid-template-columns: .86fr 1.14fr; overflow: hidden; border: 1px solid #dfd9ce; background: #fffdf8; box-shadow: 0 24px 70px #27352a18; }
 .auth-brand-panel { display: flex; flex-direction: column; padding: 40px; color: #e8e8de; background: #16201d; }
 .auth-brand-lockup { display: flex; align-items: center; gap: 12px; }
-.auth-brand-lockup > span { width: 42px; height: 42px; display: grid; place-items: center; color: #17221e; background: #db8b57; font: 700 14px "DM Mono"; letter-spacing: -1px; }
+.auth-brand-lockup > span { width: 42px; height: 42px; display: grid; place-items: center; color: #fffdf8; background: #bb6b43; font: 700 14px "DM Mono"; letter-spacing: -1px; }
 .auth-brand-lockup h1 { margin: 0; color: #fffaf0; font: 600 22px "Space Grotesk"; letter-spacing: -.8px; }
 .auth-brand-lockup small { display: block; margin-top: 3px; color: #aeb9ad; font: 10px "DM Mono"; letter-spacing: .1em; text-transform: uppercase; }
 .auth-brand-copy { max-width: 330px; margin: auto 0; }
 .auth-eyebrow { margin: 0 0 12px; color: #9a6c4d; font: 500 12px "DM Mono"; letter-spacing: .13em; text-transform: uppercase; }
-.auth-brand-panel .auth-eyebrow { color: #db8b57; }
+.auth-brand-panel .auth-eyebrow { color: #bb6b43; }
 .auth-brand-copy h2 { margin: 0; color: #fffaf0; font: 600 clamp(36px, 4vw, 58px) "Space Grotesk"; letter-spacing: -2.5px; line-height: .98; }
 .auth-brand-copy > p:last-child { margin: 23px 0 0; color: #aeb9ad; font-size: 16px; line-height: 1.65; }
 .auth-brand-foot { display: flex; align-items: center; gap: 9px; color: #aeb9ad; font: 11px "DM Mono"; }
-.auth-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #83a98e; box-shadow: 0 0 0 4px #83a98e1b; }
+.auth-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #60816a; box-shadow: 0 0 0 4px #60816a1b; }
 .auth-content { display: flex; flex-direction: column; justify-content: center; padding: 54px clamp(30px, 6vw, 86px); }
 .auth-title { margin: 0; color: #18221f; font: 600 32px "Space Grotesk"; letter-spacing: -1.3px; }
 .auth-subtitle { margin: 10px 0 0; color: #737a72; font-size: 16px; line-height: 1.5; }

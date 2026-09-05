@@ -15,6 +15,7 @@ const orderRoutes = require("./routes/order.routes");
 const managerDashboardRoutes = require("./routes/managerDashboard.routes");
 const managerQuotationRoutes = require("./routes/managerQuotation.routes");
 const managerApprovalRoutes = require("./routes/managerApproval.routes");
+const financeApprovalRoutes = require("./routes/financeApproval.routes");
 const managerOrderRoutes = require("./routes/managerOrder.routes");
 const managerReportRoutes = require("./routes/managerReport.routes");
 const requestLogger = require("./middlewares/requestLogger");
@@ -42,6 +43,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/manager/dashboard", managerDashboardRoutes);
 app.use("/api/manager/quotations", managerQuotationRoutes);
 app.use("/api/manager/approvals", managerApprovalRoutes);
+app.use("/api/finance/approvals", financeApprovalRoutes);
 app.use("/api/manager/orders", managerOrderRoutes);
 app.use("/api/manager/reports", managerReportRoutes);
 

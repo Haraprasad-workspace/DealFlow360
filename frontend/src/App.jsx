@@ -29,6 +29,8 @@ import DiscountConfigPage from "./pages/DiscountConfigPage";
 import AdminResourcePage from "./pages/AdminResourcePage";
 import WarehousePage from "./pages/WarehousePage";
 import AdminDashboard from "./pages/AdminDashboard";
+import FinanceLayout from "./layouts/FinanceLayout";
+import FinanceApprovals from "./pages/finance/FinanceApprovals";
 import AdminShell from "./components/AdminShell";
 import ProtectedInternalRoute from "./routes/ProtectedInternalRoute";
 import ProtectedPortalRoute from "./routes/ProtectedPortalRoute";
@@ -101,6 +103,14 @@ function App() {
 
 						<Route element={<ProtectedPortalRoute />}>
 							<Route path="/portal" element={<PortalPlaceholder />} />
+						</Route>
+
+						<Route element={<ProtectedInternalRoute />}>
+							<Route element={<RoleRoute allowedRoles={[USER_ROLES.FINANCE, USER_ROLES.ADMIN]} />}>
+								<Route element={<FinanceLayout />}>
+									<Route path="/finance/approvals" element={<FinanceApprovals />} />
+								</Route>
+							</Route>
 						</Route>
 
 						<Route path="/" element={<Navigate to="/auth" replace />} />

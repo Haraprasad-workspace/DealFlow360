@@ -36,8 +36,18 @@ const approveQuotation = async (managerId, quotationId) => {
 	const quotation = await loadPendingQuotation(managerId, quotationId);
 	const decision = approvalService.determineApproval({ grandTotal: quotation.grandTotal, margin: quotation.margin, riskScore: quotation.riskScore });
 	if (!decision.required) throw new AppError("Quotation does not require approval", 409);
-	quotation.approval.status = "APPROVED";
-	quotation.status = "APPROVED";
+	const needsFinanceApproval = quotation.approvalStage === "PENDING_FINANCE";
+	quotation.approval.status = needsFinanceApproval ? "PENDING" : "APPROVED";
+	if (!needsFinanceApproval) {
+		quotation.status = "APPROVED";
+		quotation.approvalStage = "APPROVED";
+	}
+	quotation.approvalAuditLog.push({
+		userId: managerId,
+		action: "APPROVED",
+		note: needsFinanceApproval ? "Manager approved; Finance approval remains required." : undefined,
+		timestamp: new Date(),
+	});
 	await quotation.save();
 	await writeAudit("QUOTATION_APPROVED", managerId, quotationId);
 	return quotation;

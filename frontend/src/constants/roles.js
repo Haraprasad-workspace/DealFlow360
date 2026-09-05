@@ -31,6 +31,8 @@ export const getHomeRouteForRole = (role) => {
 			return "/portal";
 		case USER_ROLES.ADMIN:
 			return "/admin/dashboard";
+		case USER_ROLES.FINANCE:
+			return "/finance/approvals";
 		default:
 			return "/sales-rep/dashboard";
 	}
