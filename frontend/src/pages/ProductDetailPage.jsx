@@ -4,7 +4,7 @@ import apiClient from "../api/client";
 import useCurrentUser from "../hooks/useCurrentUser";
 
 const ProductDetailPage = () => {
-	const { productId } = useParams();
+	const { id: productId } = useParams();
 	const { user } = useCurrentUser();
 	const isAdmin = user?.role === "ADMIN";
 	const [product, setProduct] = useState(null);
