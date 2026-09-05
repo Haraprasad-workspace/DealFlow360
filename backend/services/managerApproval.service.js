@@ -28,25 +28,54 @@ const loadPendingQuotation = async (managerId, quotationId) => {
 };
 
 const writeAudit = async (action, managerId, quotationId, details) => {
-	// AuditLog currently has a minimal schema; keep the write isolated for later enrichment.
 	await auditService.createAuditLog({ action, actor: managerId, entity: "Quotation", entityId: quotationId, details });
 };
 
 const approveQuotation = async (managerId, quotationId) => {
 	const quotation = await loadPendingQuotation(managerId, quotationId);
-	const decision = approvalService.determineApproval({ grandTotal: quotation.grandTotal, margin: quotation.margin, riskScore: quotation.riskScore });
-	if (!decision.required) throw new AppError("Quotation does not require approval", 409);
+
+	// Evaluate max discount rate and risk parameters for multi-level approval flow
+	const maxDiscount = Math.max(0, ...(quotation.items || []).map((i) => i.discount || 0));
+	const isHighDiscount = maxDiscount >= 15 || (quotation.riskScore && quotation.riskScore >= 40) || (quotation.margin && quotation.margin < 15);
+
+	// Check if this requires second-level Finance Manager approval
+	if (isHighDiscount && quotation.approval?.currentLevel !== "FINANCE") {
+		quotation.approval.currentLevel = "FINANCE";
+		quotation.approval.approvedByManagerAt = new Date();
+		quotation.approval.approvedByManager = managerId;
+		quotation.approval.requiresFinanceApproval = true;
+		quotation.approval.status = "PENDING";
+		quotation.status = "PENDING_APPROVAL";
+		await quotation.save();
+		await writeAudit("QUOTATION_MANAGER_APPROVED_ESCALATED_FINANCE", managerId, quotationId, {
+			maxDiscount,
+			reason: "High discount rate requires 2nd-level Finance Manager approval",
+		});
+		return {
+			quotation,
+			message: `Manager approval granted. Escalated to Finance Manager (Discount rate: ${maxDiscount}%).`,
+		};
+	}
+
+	// Fully approved for billing
 	quotation.approval.status = "APPROVED";
+	quotation.approval.currentLevel = "COMPLETED";
+	quotation.approval.approvedByManagerAt = new Date();
+	quotation.approval.approvedByManager = managerId;
 	quotation.status = "APPROVED";
 	await quotation.save();
 	await writeAudit("QUOTATION_APPROVED", managerId, quotationId);
-	return quotation;
+	return {
+		quotation,
+		message: "Quotation fully approved for billing and order conversion.",
+	};
 };
 
 const rejectQuotation = async (managerId, quotationId, reason) => {
 	if (!reason || !String(reason).trim()) throw new AppError("Rejection reason is required", 400);
 	const quotation = await loadPendingQuotation(managerId, quotationId);
 	quotation.approval.status = "REJECTED";
+	quotation.approval.rejectionReason = String(reason).trim();
 	quotation.status = "REJECTED";
 	await quotation.save();
 	await writeAudit("QUOTATION_REJECTED", managerId, quotationId, { reason: String(reason).trim() });

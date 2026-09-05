@@ -1,11 +1,14 @@
+const determineApproval = ({ grandTotal = 0, margin = 0, riskScore = 0, items = [] }) => {
+	const maxDiscount = Math.max(0, ...items.map((i) => i.discount || 0));
+	const managerRequired = grandTotal >= 5000 || margin < 25 || riskScore >= 20 || maxDiscount >= 10;
+	const financeRequired = maxDiscount >= 15 || riskScore >= 40 || margin < 15;
 
-const determineApproval = ({ grandTotal, margin, riskScore = 0 }) => {
-	const required = grandTotal >= 10000 || margin < 15 || riskScore >= 30;
-	const financeRequired = grandTotal >= 10000 || riskScore >= 70;
 	return {
-		required,
-		currentLevel: required ? (financeRequired ? "FINANCE" : "MANAGER") : "NONE",
-		status: required ? "PENDING" : "NOT_REQUIRED",
+		required: managerRequired || financeRequired,
+		managerRequired,
+		financeRequired,
+		currentLevel: managerRequired ? "MANAGER" : (financeRequired ? "FINANCE" : "NONE"),
+		status: managerRequired || financeRequired ? "PENDING" : "NOT_REQUIRED",
 	};
 };
 
